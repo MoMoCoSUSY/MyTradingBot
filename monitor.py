@@ -6,6 +6,7 @@ import random
 import json
 import os  # 导入 os 库来设置环境变量
 from datetime import datetime
+from notifier import send_telegram_msg
 
 # ================= 配置加载 =================
 def load_config():
@@ -73,13 +74,21 @@ def fetch_and_check():
             current_rsi = current_data['RSI']
             current_price = current_data['Close']
 
+            # 信号判断
+            msg = ""
             status = "OK"
             if current_rsi <= RSI_OVERSOLD:
                 status = "⚠️ [超卖 - 买入信号]"
             elif current_rsi >= RSI_OVERBOUGHT:
                 status = "📢 [超买 - 卖出信号]"
             
-            print(f"{ticker:5} | 价格: ${current_price:8.2f} | RSI: {current_rsi:6.2f} | {status}")
+            msg = f"{ticker:5} | 价格: ${current_price:8.2f} | RSI: {current_rsi:6.2f} | {status}"
+
+            if msg:
+                print(msg)
+                send_telegram_msg(msg) # 调用独立模块
+            else:
+                print(f"{ticker:5} | RSI: {current_rsi:6.2f} | {status}")
 
         except Exception as e:
             print(f"❌ {ticker} 错误: {e}")
